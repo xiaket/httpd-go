@@ -13,6 +13,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
 )
 
@@ -102,9 +104,12 @@ func main() {
 	}
 	fmt.Println("Listening in " + address + "\n")
 
+	route := mux.NewRouter()
 	for _, file := range serving {
-		http.HandleFunc("/"+file, DownloadFile)
+		route.HandleFunc("/"+file, DownloadFile)
 		fmt.Println("link: http://" + address + "/" + url.QueryEscape(file))
 	}
-	http.ListenAndServe(address, nil)
+	fmt.Println("")
+	loggedRouter := handlers.LoggingHandler(os.Stdout, route)
+	http.ListenAndServe(address, loggedRouter)
 }
